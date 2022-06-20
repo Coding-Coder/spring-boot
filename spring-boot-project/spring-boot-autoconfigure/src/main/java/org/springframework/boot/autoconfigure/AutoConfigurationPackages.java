@@ -16,16 +16,8 @@
 
 package org.springframework.boot.autoconfigure;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -37,6 +29,8 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import java.util.*;
 
 /**
  * Class for storing auto-configuration packages for reference later (e.g. by JPA entity
@@ -90,12 +84,16 @@ public abstract class AutoConfigurationPackages {
 	 * @param packageNames the package names to set
 	 */
 	public static void register(BeanDefinitionRegistry registry, String... packageNames) {
+		// 这里参数 packageNames 缺省情况下就是一个字符串，
+		// 是使用了注解 @SpringBootApplication 的 Spring Boot 应用程序入口类所在的包
 		if (registry.containsBeanDefinition(BEAN)) {
+			// 如果该bean已经注册，则将要注册包名称添加进去
 			BeanDefinition beanDefinition = registry.getBeanDefinition(BEAN);
 			ConstructorArgumentValues constructorArguments = beanDefinition.getConstructorArgumentValues();
 			constructorArguments.addIndexedArgumentValue(0, addBasePackages(constructorArguments, packageNames));
 		}
 		else {
+			//如果该bean尚未注册，则注册该bean，参数中提供的包名称会被设置到bean定义中去
 			GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
 			beanDefinition.setBeanClass(BasePackages.class);
 			beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, packageNames);
@@ -113,13 +111,22 @@ public abstract class AutoConfigurationPackages {
 	}
 
 	/**
+	 * AutoConfigurationPackages.Registrar 这个类就干一个事，向容器中注入了一个 Bean ，这个 Bean 就是 {@link BasePackages} ，
+	 * 它有一个参数，这个参数是使用了 @AutoConfigurationPackage 这个注解的类所在的包路径,保存自动配置类以供之后的使用
+	 *
 	 * {@link ImportBeanDefinitionRegistrar} to store the base package from the importing
 	 * configuration.
 	 */
 	static class Registrar implements ImportBeanDefinitionRegistrar, DeterminableImports {
 
+		/**
+		 * 注册bean的一个方法
+		 * @param metadata 注解的元数据信息
+		 * @param registry bean定义的注册中心
+		 */
 		@Override
 		public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+			// 将注解标注的元信息传入，获取到相应的包名
 			register(registry, new PackageImport(metadata).getPackageName());
 		}
 

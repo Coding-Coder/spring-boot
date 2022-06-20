@@ -16,15 +16,11 @@
 
 package org.springframework.boot;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AliasFor;
+
+import java.lang.annotation.*;
 
 /**
  * Indicates that a class provides Spring Boot application
@@ -43,7 +39,8 @@ import org.springframework.core.annotation.AliasFor;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Configuration
+@Configuration // 配置类的作用等同于配置文件，配置类也是容器中的一个对象
+// @SpringBootConfiguration 注解的作用与 @Configuration 注解相同，都是标识一个可以被组件扫描器扫描的配置类，只不过 @SpringBootConfiguration 是被Spring Boot进行了重新封装命名而已
 public @interface SpringBootConfiguration {
 
 	/**

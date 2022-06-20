@@ -16,13 +16,9 @@
 
 package org.springframework.boot.autoconfigure.condition;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.springframework.context.annotation.Conditional;
+
+import java.lang.annotation.*;
 
 /**
  * {@link Conditional @Conditional} that matches when the application is a web
@@ -57,11 +53,13 @@ public @interface ConditionalOnWebApplication {
 
 		/**
 		 * Only servlet-based web application will match.
+		 * 基于servlet的web应用程序
 		 */
 		SERVLET,
 
 		/**
 		 * Only reactive-based web application will match.
+		 * 基于响应的web应用程序
 		 */
 		REACTIVE
 

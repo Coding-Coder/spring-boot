@@ -16,13 +16,6 @@
 
 package org.springframework.boot.autoconfigure;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -32,6 +25,8 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.support.SpringFactoriesLoader;
+
+import java.lang.annotation.*;
 
 /**
  * Enable auto-configuration of the Spring Application Context, attempting to guess and
@@ -79,8 +74,12 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@AutoConfigurationPackage
+@AutoConfigurationPackage // 自动配置包(作用：向容器中注入了一个 Bean ，这个 Bean 就是 org.springframework.boot.autoconfigure.AutoConfigurationPackages.BasePackages )
+// Spring的底层注解@Import，给容器中导入一个组件类
+// 导入的组件是AutoConfigurationImportSelector.class
+// AutoConfigurationImportSelector 可以帮助 Springboot 应用将所有符合条件的 @Configuration 配置都加载到当前 SpringBoot 创建并使用的 IOC 容器( ApplicationContext )中
 @Import(AutoConfigurationImportSelector.class)
+// 告诉SpringBoot开启自动配置功能，这样自动配置才能生效
 public @interface EnableAutoConfiguration {
 
 	String ENABLED_OVERRIDE_PROPERTY = "spring.boot.enableautoconfiguration";
@@ -89,6 +88,7 @@ public @interface EnableAutoConfiguration {
 	 * Exclude specific auto-configuration classes such that they will never be applied.
 	 * @return the classes to exclude
 	 */
+	// 返回不会被导入到 Spring 容器中的类
 	Class<?>[] exclude() default {};
 
 	/**
@@ -97,6 +97,7 @@ public @interface EnableAutoConfiguration {
 	 * @return the class names to exclude
 	 * @since 1.3.0
 	 */
+	// 返回不会被导入到 Spring 容器中的类名
 	String[] excludeName() default {};
 
 }

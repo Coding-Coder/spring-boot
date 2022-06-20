@@ -16,12 +16,7 @@
 
 package org.springframework.boot;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
 import groovy.lang.Closure;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader;
@@ -45,6 +40,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Loads bean definitions from underlying sources, including XML and JavaConfig. Acts as a
@@ -79,12 +78,16 @@ class BeanDefinitionLoader {
 		Assert.notNull(registry, "Registry must not be null");
 		Assert.notEmpty(sources, "Sources must not be empty");
 		this.sources = sources;
+		// 注解形式的Bean定义读取器 比如：@Configuration @Bean @Component @Controller @Service等等
 		this.annotatedReader = new AnnotatedBeanDefinitionReader(registry);
+		// XML形式的Bean定义读取器
 		this.xmlReader = new XmlBeanDefinitionReader(registry);
 		if (isGroovyPresent()) {
 			this.groovyReader = new GroovyBeanDefinitionReader(registry);
 		}
+		// 类路径扫描器
 		this.scanner = new ClassPathBeanDefinitionScanner(registry);
+		// 扫描器添加排除过滤器
 		this.scanner.addExcludeFilter(new ClassExcludeFilter(sources));
 	}
 
@@ -132,15 +135,19 @@ class BeanDefinitionLoader {
 
 	private int load(Object source) {
 		Assert.notNull(source, "Source must not be null");
+		// 从Class加载
 		if (source instanceof Class<?>) {
 			return load((Class<?>) source);
 		}
+		// 从Resource加载
 		if (source instanceof Resource) {
 			return load((Resource) source);
 		}
+		// 从Package加载
 		if (source instanceof Package) {
 			return load((Package) source);
 		}
+		// 从 CharSequence 加载
 		if (source instanceof CharSequence) {
 			return load((CharSequence) source);
 		}
@@ -154,6 +161,7 @@ class BeanDefinitionLoader {
 			load(loader);
 		}
 		if (isComponent(source)) {
+			//将 启动类的 BeanDefinition注册进 beanDefinitionMap
 			this.annotatedReader.register(source);
 			return 1;
 		}
@@ -273,6 +281,9 @@ class BeanDefinitionLoader {
 		return Package.getPackage(source.toString());
 	}
 
+	/**
+	 * 判断类上有没有添加 @Component 注解
+	 */
 	private boolean isComponent(Class<?> type) {
 		// This has to be a bit of a guess. The only way to be sure that this type is
 		// eligible is to make a bean definition out of it and try to instantiate it.
