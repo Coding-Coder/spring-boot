@@ -1,0 +1,6 @@
+server:
+  port: 8001
+
+simplebean:
+  id: 123
+  name: lxy123
