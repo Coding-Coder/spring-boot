@@ -16,31 +16,23 @@
 
 package org.springframework.boot.web.embedded.tomcat;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import javax.naming.NamingException;
-
-import org.apache.catalina.Container;
-import org.apache.catalina.Context;
-import org.apache.catalina.Engine;
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleState;
-import org.apache.catalina.Service;
+import org.apache.catalina.*;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.naming.ContextBindings;
-
 import org.springframework.boot.web.server.PortInUseException;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.server.WebServerException;
 import org.springframework.util.Assert;
+
+import javax.naming.NamingException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * {@link WebServer} that can be used to control a Tomcat web server. Usually this class
@@ -103,6 +95,7 @@ public class TomcatWebServer implements WebServer {
 				});
 
 				// Start the server to trigger initialization listeners
+				// 启动 tomcat
 				this.tomcat.start();
 
 				// We can re-throw failure exception directly in the main thread
@@ -196,10 +189,13 @@ public class TomcatWebServer implements WebServer {
 				addPreviouslyRemovedConnectors();
 				Connector connector = this.tomcat.getConnector();
 				if (connector != null && this.autoStart) {
+					// 启动那些在Tomcat启动时就需要启动Servlet
 					performDeferredLoadOnStartup();
 				}
+				//检查Connector是否都启动了
 				checkThatConnectorsHaveStarted();
 				this.started = true;
+				//打印最终启动完成的日志
 				logger.info("Tomcat started on port(s): " + getPortsDescription(true) + " with context path '"
 						+ getContextPath() + "'");
 			}
