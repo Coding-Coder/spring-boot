@@ -16,40 +16,29 @@
 
 package org.springframework.boot.autoconfigure.web.servlet;
 
-import java.util.Arrays;
-import java.util.List;
-
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.ServletRegistration;
-
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionMessage;
+import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.autoconfigure.condition.ConditionMessage.Style;
-import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
-import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
 import org.springframework.boot.autoconfigure.http.HttpProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.context.annotation.Conditional;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.*;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.ServletRegistration;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for the Spring
@@ -62,12 +51,16 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @author Stephane Nicoll
  * @author Brian Clozel
  * @since 2.0.0
+ *
+ * DispatcherServletAutoConfiguration 主要做了两件事：
+ * 1）配置DispatcherServlet
+ * 2）配置DispatcherServlet的注册Bean(DispatcherServletRegistrationBean)
  */
-@AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
-@Configuration(proxyBeanMethods = false)
-@ConditionalOnWebApplication(type = Type.SERVLET)
-@ConditionalOnClass(DispatcherServlet.class)
-@AutoConfigureAfter(ServletWebServerFactoryAutoConfiguration.class)
+@AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)// 加载顺序
+@Configuration(proxyBeanMethods = false) // 这是一个配置类，将会被spring给解析
+@ConditionalOnWebApplication(type = Type.SERVLET) // 当前是一个web项目，且是Servlet项目的时候才会被解析
+@ConditionalOnClass(DispatcherServlet.class) // 指明DispatcherServlet这个核心类必须存在才解析该类
+@AutoConfigureAfter(ServletWebServerFactoryAutoConfiguration.class) // 指明在ServletWebServerFactoryAutoConfiguration这个类加载之后再解析，设定了一个顺序
 public class DispatcherServletAutoConfiguration {
 
 	/*
@@ -81,9 +74,9 @@ public class DispatcherServletAutoConfiguration {
 	public static final String DEFAULT_DISPATCHER_SERVLET_REGISTRATION_BEAN_NAME = "dispatcherServletRegistration";
 
 	@Configuration(proxyBeanMethods = false)
-	@Conditional(DefaultDispatcherServletCondition.class)
-	@ConditionalOnClass(ServletRegistration.class)
-	@EnableConfigurationProperties({ HttpProperties.class, WebMvcProperties.class })
+	@Conditional(DefaultDispatcherServletCondition.class) // 指明了一个前置条件判断，由DefaultDispatcherServletCondition实现。主要是判断了是否已经存在DispatcherServlet，如果没有才会触发解析
+	@ConditionalOnClass(ServletRegistration.class) // 指明了当ServletRegistration这个类存在的时候才会触发解析，生成的 DispatcherServlet才能注册到ServletContext中
+	@EnableConfigurationProperties({ HttpProperties.class, WebMvcProperties.class }) // 将会从application.properties这样的配置文件中读取 spring.http和spring.mvc前缀的属性生成配置对象HttpProperties和WebMvcProperties
 	protected static class DispatcherServletConfiguration {
 
 		@Bean(name = DEFAULT_DISPATCHER_SERVLET_BEAN_NAME)
@@ -97,6 +90,7 @@ public class DispatcherServletAutoConfiguration {
 			return dispatcherServlet;
 		}
 
+		// multipartResolver方法主要是把你配置的MultipartResolver的Bean给重命名一下，防止你不是用multipartResolver这个名字作为Bean的名字
 		@Bean
 		@ConditionalOnBean(MultipartResolver.class)
 		@ConditionalOnMissingBean(name = DispatcherServlet.MULTIPART_RESOLVER_BEAN_NAME)

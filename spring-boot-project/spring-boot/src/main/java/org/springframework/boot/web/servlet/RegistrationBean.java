@@ -16,14 +16,13 @@
 
 package org.springframework.boot.web.servlet;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.Ordered;
 import org.springframework.util.StringUtils;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 
 /**
  * Base class for Servlet 3.0+ based registration beans.
@@ -45,6 +44,7 @@ public abstract class RegistrationBean implements ServletContextInitializer, Ord
 
 	@Override
 	public final void onStartup(ServletContext servletContext) throws ServletException {
+		//获取当前到底是一个filter 还是一个servlet 还是一个listener
 		String description = getDescription();
 		if (!isEnabled()) {
 			logger.info(StringUtils.capitalize(description) + " was not registered (disabled)");
